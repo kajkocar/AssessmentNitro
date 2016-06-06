@@ -9,10 +9,15 @@
 // https://github.com/DaveGamble/cJSON
 // and included in solution under JSON folder
 #include "JSON/cJSON.h"
+
 #include "AssessDataProviderJSON.h"
 #include "AssessDataProviderFactory.h"
 #include "AssessRectsContainer.h"
 
+//////////////////////////////////////////////////////////////////////////
+// easyunit taken from
+// http://easyunit.sourceforge.net/
+// and included in solution under easyunit folder
 #include "easyunit\testharness.h"
 using namespace easyunit;
 
@@ -23,6 +28,11 @@ class twoIntersection
 public:
 	twoIntersection(int f, int s, AssessRectangle r) : first(f), second(s), result(r) {};
 
+	bool operator ==(const twoIntersection& v) const
+	{
+		return (result == v.result);
+	}
+
 	int first, second;
 	AssessRectangle result;
 };
@@ -31,6 +41,11 @@ class threeIntersection : public twoIntersection
 {
 public:
 	threeIntersection(int f, int s, int t, AssessRectangle r) : twoIntersection(f,s,r), third(t) {};
+
+	bool operator ==(const threeIntersection& v) const
+	{
+		return (result == v.result);
+	}
 
 	int third;
 };
@@ -107,7 +122,10 @@ int main(int argc, char *argv[])
 		while (startFrom != -1)
 		{
 			twoIntersection ti( i + 1, startFrom + 1, intersection );
-			twos.push_back(ti);
+			// we do not want same intersection more than once
+			auto it = std::find(twos.begin(), twos.end(), ti);
+			if( it == twos.end())
+				twos.push_back(ti);
 
 			// we will use results intersection from those 2 to see if there is an intersection
 			// with some one else as well
@@ -116,7 +134,11 @@ int main(int argc, char *argv[])
 			while (startFrom3 != -1)
 			{
 				threeIntersection ti3(i + 1, startFrom + 1, startFrom3 + 1, intersection3);
-				threes.push_back(ti3);
+				// we do not want same intersection more than once
+				auto it = std::find(threes.begin(), threes.end(), ti3);
+				if (it == threes.end())
+					threes.push_back(ti3);
+
 				startFrom3 = allRects.findIntersectFrom(startFrom3 + 1, intersection, intersection3);
 			}
 
